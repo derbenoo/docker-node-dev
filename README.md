@@ -2,20 +2,25 @@
 
 Solve common issues when developing node applications inside a Docker container.
 
-## :running: Quick Start
+## Quick Start
+
+Use one of the ways documented below to start a development container. Each one assumes that you are in the directory which you want to mount inside the container.
 
 #### One-liner
 
 ```
-docker run -it --rm --mount type=bind,source="$(pwd)"/,target=/app derbenoo/node-dev
+$ docker run -it --rm --entrypoint=/bin/bash --mount type=bind,source="$(pwd)"/,target=/app derbenoo/node-dev
 ```
 
 #### Docker-compose
 
 ```yml
 # docker-compose.yml
+version: "3.2"
 services:
   node-dev:
+    container_name: node-dev
+    hostname: node-dev
     image: derbenoo/node-dev:latest
     volumes:
       - type: bind
@@ -35,7 +40,7 @@ $ docker run -d --name node-dev --mount type=bind,source="$(pwd)"/,target=/app n
 $ docker exec -it node-dev bash
 ```
 
-## :tada: Features
+## Features
 
 The following modifications are applied to the Node base image:
 
@@ -45,7 +50,7 @@ The following modifications are applied to the Node base image:
 - Activate tab completion for npm
 - Add npm package executables to `$PATH`
 - Use the same UID as the mounted volume's owner
-- Let the container idle
+- Let the container idle by default
 
 ### Use Node 10 as base image
 
@@ -85,7 +90,17 @@ Enables tab-completion in all npm commands: https://docs.npmjs.com/cli/completio
 RUN echo 'export PATH="$PATH:/app/node_modules/.bin"' >> ~/.bashrc
 ```
 
-Note that the `node_modules/.bin` directory is appended to the end of the `$PATH` list so that it does not overwrite system commands.
+Note that the `node_modules/.bin` directory is appended to the end of the `$PATH` variable so that it does not overwrite any system commands.
+
+### Let the container idle by default
+
+```
+ENTRYPOINT tail -f /dev/null
+```
+
+The container will idle by default such that a developer can attach to it with a shell: `docker exec -it app /bin/bash`.
+
+You can override this entrypoint using `docker run --entrypoint=/bin/bash` or the [entrypoint option](https://docs.docker.com/compose/compose-file/#entrypoint) inside a docker-compose file.
 
 ### Use the same UID as the mounted volume's owner
 
@@ -94,19 +109,44 @@ ENV SWITCH_USER=1
 RUN echo "source /switch-user.sh /app/" >> ~/.bashrc
 ```
 
-- Remove passwords for the `node` and `root` users.
-- Use the same UID as the mounted volume to avoid permission issues
+File permissions are a frequent issue when mounting your repository inside a development container. If you are developing as the `root` user inside the container, all files created will be owned by root on the host machine as well, giving you lots of permission issues when trying to modify those files on the host as a normal system user. This problem occurs whenever the UID of the host system's user does not match the UID of the container's user.
 
-**If you want to disable this feature**: Do not switch user
+Therefore, the `switch-user.sh` script makes sure that you are logged in with a user having the same UID as the host system user who owns the repository files. If no user with such a UID exists, the script creates one.
 
-`su root`
+##### Switching back to root
 
-Set `SWITCH_USER=0` in a docker-compose file or using `-e` to prevent switching.
-
-### Let the container idle
+You can switch back to the `root` user inside the container at anytime:
 
 ```
-ENTRYPOINT tail -f /dev/null
+$ su root
 ```
 
-The container will idle such that a developer can attach to it with a shell: `docker exec -it app /bin/bash`.
+No password is required as the passwords for all users are removed inside the container.
+
+##### Disable user switching
+
+If you want to disable this behavior, you can simply set the `SWITCH_USER` environment variable to `0`.
+
+Docker run:
+
+```
+$ docker run --env SWITCH_USER=0 -it --rm --entrypoint=/bin/bash --mount type=bind,source="$(pwd)"/,target=/app derbenoo/node-dev
+```
+
+Docker-compose:
+
+```yml
+# docker-compose.yml
+version: "3.2"
+services:
+  node-dev:
+    container_name: node-dev
+    hostname: node-dev
+    image: derbenoo/node-dev:latest
+    volumes:
+      - type: bind
+        source: .
+        target: /app/
+    environment:
+      - SWITCH_USER=0
+```

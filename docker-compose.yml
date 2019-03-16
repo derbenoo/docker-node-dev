@@ -1,0 +1,10 @@
+version: "3.2"
+services:
+  node-dev:
+    container_name: node-dev
+    hostname: node-dev
+    image: derbenoo/node-dev:latest
+    volumes:
+      - type: bind
+        source: .
+        target: /app/
