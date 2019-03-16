@@ -1,1 +1,2 @@
+# Ignore shell scripts for determining the repo's language
 *.sh linguist-vendored
