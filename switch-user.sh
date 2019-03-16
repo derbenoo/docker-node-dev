@@ -39,7 +39,7 @@ if [ $CUR_UID -ne $DIR_UID ]
   fi
 
   # Do not change the user again
-  unset SWITCH_USER
+  export SWITCH_USER='0'
 
   # Switch the the user with the directory's UID
   USER=$(getent passwd $DIR_UID | cut -d: -f1)
