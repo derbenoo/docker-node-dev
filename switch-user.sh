@@ -11,7 +11,7 @@ if [ $# -ne 1 ]
 fi
 
 # Check if the user should be switched
-if [ -z "${SWITCH_USER}" ]
+if [ "$SWITCH_USER" = "0" ]
   then
   return 0
 fi
