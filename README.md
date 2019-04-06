@@ -51,6 +51,7 @@ The following modifications are applied to the Node base image:
 - Add npm package executables to `$PATH`
 - Use the same UID as the mounted volume's owner
 - Let the container idle by default
+- Load bash aliases from `~/bash_aliases` if the file exists
 
 ### Use Node 10 as base image
 
@@ -149,4 +150,17 @@ services:
         target: /app/
     environment:
       - SWITCH_USER=0
+```
+
+### Load bash aliases from `~/bash_aliases`
+
+Bash aliases can be defined in a separate file called `~/.bash_aliases`. An example file could look like this:
+
+```sh
+# ~/.bash_aliases
+
+# add some ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
 ```

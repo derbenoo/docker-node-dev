@@ -20,6 +20,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set the Node environment to "development"
 ENV NODE_ENV=development
 
+# Load bash aliases if ~/.bash_aliases file exists
+RUN echo 'if [ -f ~/.bash_aliases ]; then . ~/.bash_aliases; fi' >> ~/.bashrc
+
 # Activate npm autocompletion
 RUN npm completion >> ~/.bashrc
 
