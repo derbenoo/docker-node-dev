@@ -11,8 +11,8 @@ RUN passwd -d node
 # Make root directory accessible (rwx) for the root group
 RUN chmod g+rwx /root/
 
-# Set the working directory to the main repository (mounted under /app)
-WORKDIR /app
+# Specify the absolute path to the repository mount point in an environment variable (so it can be changed). Defaults to "/app"
+ENV REPOSITORY_PATH /app
 
 # Signal debian that we are non-interactive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -27,15 +27,18 @@ RUN echo 'if [ -f ~/.bash_aliases ]; then . ~/.bash_aliases; fi' >> ~/.bashrc
 RUN npm completion >> ~/.bashrc
 
 # Add .bin folder of the project to the PATH env variable
-RUN echo 'export PATH="/app/node_modules/.bin:$PATH"' >> ~/.bashrc
+RUN echo 'export PATH="$PATH:$REPOSITORY_PATH/node_modules/.bin"' >> ~/.bashrc
 
 # Make config files accessible (e.g. for npm)
 RUN echo "chmod -R g+rwx /root/.config/ &> /dev/null" >> ~/.bashrc
 
+# Change directory to the repository
+RUN echo 'cd $REPOSITORY_PATH' >> ~/.bashrc
+
 # Switch to the correct user to avoid permission issues
 COPY switch-user.sh /
 ENV SWITCH_USER=1
-RUN echo "source /switch-user.sh /app/" >> ~/.bashrc
+RUN echo 'source /switch-user.sh $REPOSITORY_PATH/' >> ~/.bashrc
 
 # Entrypoint: idle (dev attach via interactive shell)
 ENTRYPOINT tail -f /dev/null

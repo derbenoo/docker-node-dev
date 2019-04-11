@@ -64,10 +64,14 @@ Node 10 is the current LTS (long-term support) version and supported until **01.
 ### Mount repository to `/app`
 
 ```
-WORKDIR /app
+ENV REPOSITORY_PATH /app
 ```
 
-To avoid re-building the docker image each time a source-code change was made, it is common practice to mount the entire repository inside the container. The `/app` directory is configured to be the mount point for the repository.
+To avoid re-building the docker image each time a source-code change was made, it is common practice to mount the entire repository inside the container. The `/app` directory is configured to be the mount point for the repository by default. This can be changed by setting the `REPOSITORY_PATH` environment variable:
+
+```
+$ docker run --env REPOSITORY_PATH=/repo-path -it --rm --entrypoint=/bin/bash --mount type=bind,source="$(pwd)"/,target=/app derbenoo/node-dev
+```
 
 ### Set the node environment to `development`
 
