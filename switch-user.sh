@@ -41,7 +41,7 @@ if [ $CUR_UID -ne $DIR_UID ]
   # Do not change the user again
   export SWITCH_USER='0'
 
-  # Switch the the user with the directory's UID
+  # Switch to the user with the directory's UID
   USER=$(getent passwd $DIR_UID | cut -d: -f1)
   usermod -aG root $USER
   su --preserve-environment --shell=/bin/bash $USER
