@@ -20,9 +20,6 @@ WORKDIR ${REPOSITORY_PATH}
 # Set the Node environment to "development"
 ENV NODE_ENV=development
 
-# Add .bin folder of the project's node_modules to the PATH env variable
-ENV PATH="${PATH}:${REPOSITORY_PATH}/node_modules/.bin"
-
 # Switch to the correct user to avoid permission issues
 ENV SWITCH_USER=1
 
