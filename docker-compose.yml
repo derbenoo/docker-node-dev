@@ -3,8 +3,11 @@ services:
   node-dev:
     container_name: node-dev
     hostname: node-dev
-    image: derbenoo/node-dev:latest
+    build: ./
+    image: node-dev:latest
     volumes:
       - type: bind
         source: .
         target: /app/
+    environment:
+      - DEBUG_DOCKER_SETUP=1

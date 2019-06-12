@@ -47,11 +47,13 @@ The following modifications are applied to the Node base image:
 - Use Node 10 as base image
 - Mount repository to `/app`
 - Set the node environment to `development`
-- Activate tab completion for npm
+- Execute scripts on container startup
+- Execute scripts when a new bash is spawned
 - Add npm package executables to `$PATH`
+- Activate tab completion for npm
 - Use the same UID as the mounted volume's owner
-- Let the container idle by default
 - Load bash aliases from `~/bash_aliases` if the file exists
+- Let the container idle by default
 
 ### Use Node 10 as base image
 
@@ -81,10 +83,33 @@ ENV NODE_ENV=development
 
 `NODE_ENV` is an environment variable that specifies the environment in which an application is running such as development, staging or production. It is a convention used by many packages.
 
+### Execute scripts on container startup
+
+```
+ENTRYPOINT ["bash", "/entrypoint.sh"]
+
+# entrypoint.sh
+source /container-startup.sh
+```
+
+Commands executed via `RUN` inside a Dockerfile can only introduce changes to the files of the final docker image but not to the container's runtime (e.g., starting a daemon process). It is therefore often useful to execute scripts when the container is started. This is done via an `entrypoint.sh` script. An entrypoint script is already provided by this docker image, which automatically checks the `/container-startup-scripts` folder and executes all scripts it encounters inside that folder in alphabetical order. You can therefore place all scripts you want to be executed at startup inside the `/container-startup-scripts` folder. This behavior can be deactivated by setting the `EXEC_CONTAINER_STARTUP_SCRIPTS` to `0`.
+
+### Execute scripts when a new bash is spawned
+
+```
+RUN echo 'source /shell-startup.sh' >> ~/.bashrc
+```
+
+It is possible to execute a script whenever a new bash is spawned by placing the script inside the `/shell-startup-scripts/` directory. This behavior can be deactivated by setting the `EXEC_SHELL_STARTUP_SCRIPTS` environment variable to `0`. The following scripts are executed by default:
+- Load bash aliases
+- Activate tab completion for npm
+- Switch to the user with the same UID as the mounted volume's owner  
+
+
 ### Activate tab completion for npm
 
 ```
-RUN npm completion >> ~/.bashrc
+shell-startup-scripts/npm-completion.sh
 ```
 
 Enables tab-completion in all npm commands: https://docs.npmjs.com/cli/completion.html
@@ -100,7 +125,8 @@ Note that the `node_modules/.bin` directory is appended to the end of the `$PATH
 ### Let the container idle by default
 
 ```
-ENTRYPOINT tail -f /dev/null
+# entrypoint.sh
+tail -f /dev/null
 ```
 
 The container will idle by default such that a developer can attach to it with a shell: `docker exec -it app /bin/bash`.
@@ -111,7 +137,8 @@ You can override this entrypoint using `docker run --entrypoint=/bin/bash` or th
 
 ```
 ENV SWITCH_USER=1
-RUN echo "source /switch-user.sh /app/" >> ~/.bashrc
+container-startup-scripts/create-user-for-repo-uid.sh
+shell-startup-scripts/switch-user.sh
 ```
 
 File permissions are a frequent issue when mounting your repository inside a development container. If you are developing as the `root` user inside the container, all files created will be owned by root on the host machine as well, giving you lots of permission issues when trying to modify those files on the host as a normal system user. This problem occurs whenever the UID of the host system's user does not match the UID of the container's user.
