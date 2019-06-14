@@ -1,15 +1,9 @@
 # Node 10 is the current LTS version, supported until 01.04.2021 (https://nodejs.org/en/about/releases/)
 FROM node:10-stretch
 
-### USERS & PERMISSIONS ###
 # Make sure we are root
 USER root
 
-# Remove root and node user passwords
-RUN passwd -d root
-RUN passwd -d node
-
-### ENVIRONMENT VARIABLES ###
 # Whether to print debug information
 ENV DEBUG_DOCKER_SETUP=0
 
@@ -31,7 +25,6 @@ COPY shell-startup.sh /shell-startup.sh
 # Execute all shell startup-scripts for each new bash
 RUN echo 'source /shell-startup.sh' >> ~/.bashrc
 
-### STARTUP ###
 # Copy over container-startup-scripts folder
 COPY container-startup-scripts /container-startup-scripts
 COPY container-startup.sh /container-startup.sh
