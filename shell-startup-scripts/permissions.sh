@@ -10,6 +10,7 @@ if [ "$DOCKER_RM_USER_PWDS" = "1" ]
   then
     passwd -d root &> /dev/null
     passwd -d node &> /dev/null
+    if [ "$DEBUG_DOCKER_SETUP" = "1" ]; then echo "[permissions.sh] Removed passwords for user accounts"; fi
 fi
 
 # Make root directory accessible (rwx) for the root group

@@ -25,6 +25,7 @@ if [ $CUR_UID -ne $DIR_UID ]
   # Switch to the user with the directory's UID
   USER=$(getent passwd $DIR_UID | cut -d: -f1)
   usermod -aG root $USER
+  if [ "$DEBUG_DOCKER_SETUP" = "1" ]; then echo "[switch-user.sh] Switching to user: $USER"; fi
   su --preserve-environment --shell=/bin/bash $USER
 
   # Exit after switching
