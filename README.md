@@ -153,7 +153,7 @@ You can switch back to the `root` user inside the container at anytime:
 $ su root
 ```
 
-No password is required as the passwords for all users are removed inside the container.
+No password is required as the passwords for all users are removed inside the container. If you want to disable this behavior, you can set `DOCKER_RM_USER_PWDS` to `0`.
 
 ##### Disable user switching
 

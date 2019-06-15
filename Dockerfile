@@ -4,6 +4,9 @@ FROM node:10-stretch
 # Make sure we are root
 USER root
 
+# Whether to remove user account passwords
+ENV DOCKER_RM_USER_PWDS=1
+
 # Whether to print debug information
 ENV DEBUG_DOCKER_SETUP=0
 

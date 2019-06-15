@@ -6,8 +6,11 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Remove root and node user passwords
-passwd -d root &> /dev/null
-passwd -d node &> /dev/null
+if [ "$DOCKER_RM_USER_PWDS" = "1" ]
+  then
+    passwd -d root &> /dev/null
+    passwd -d node &> /dev/null
+fi
 
 # Make root directory accessible (rwx) for the root group
 chmod g+rwx /root/
